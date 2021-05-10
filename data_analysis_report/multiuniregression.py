@@ -43,6 +43,7 @@ def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
         plt.tight_layout()
     plt.savefig(path, format=fig_extension, dpi=resolution)
 
+# Adding headers to the file and converting it to csv format
 def save_file_with_headers(path):
     '''
     update the file without header to add headers
@@ -54,7 +55,7 @@ def save_file_with_headers(path):
 def ordinal_data_regression(csvpath):
     
     cardata = pd.read_csv(csvpath)
-    # encoding for each attribute
+    # encoding for each attribute to convert from qualitative to ordinal scalar sets
     cardata['buying'] = cardata['buying'].astype('category')
     cardata['buying'] = cardata['buying'].cat.reorder_categories(['low', 'med', 'high', 'vhigh'], ordered=True)
     cardata['buying'] = cardata['buying'].cat.codes
@@ -78,7 +79,6 @@ def ordinal_data_regression(csvpath):
     cardata['class'] = cardata['class'].cat.codes
     
     # checking for attribute correlation using Pearson's coefficient and scatter matrix
-    
     corr_matrix = cardata.corr()
     pricecor = corr_matrix['buying'].sort_values(ascending=False)
     print(pricecor)
@@ -88,11 +88,9 @@ def ordinal_data_regression(csvpath):
     
     # splitting the dataset into a training set and a test set
     # I noticed that there is a slight negative correlation between buying price and car acceptability
-    # Normally, I would choose to do stratified sampling based on correlated attributes, however
-    # this result seems counter-intuitive, so I just perform random sampling instead
-    
+    # Normally, I would choose to do stratified sampling based on correlated attributes, however,
+    # this correlation result seems counter-intuitive, so I just perform random sampling instead
     train_set, test_set = train_test_split(cardata, test_size=0.2, random_state=42)        
-#    train_set, test_set = train_test_split(cardata, test_size=0.05, random_state=42)
     
     # Linear Regression, Decision Tree & Random Forest Regressor
     
@@ -115,7 +113,6 @@ def ordinal_data_regression(csvpath):
     testsetpricepredRF= forest_reg.predict(testsetnoprice)
     trainsetpricepredRF= forest_reg.predict(trainsetnoprice)
     
-    
     #Performance Metrics (MSE, RMSE)
     lin_mse_trainLR = mean_squared_error(trainsetprice, trainsetpricepredLR)
     lin_mse_testLR = mean_squared_error(testsetprice, testsetpricepredLR)
@@ -136,15 +133,17 @@ def ordinal_data_regression(csvpath):
     # Since for Linear Regression RMSE_train > RMSE_test, we can conclude that there is a slight underfitting of the data
     # Since for Decision Tree Regressor RMSE_train < RMSE_test, we can conclude that there is overfitting of the data
     # Since for Random Forest Regressor RMSE_train < RMSE_test, we can conclude that there is some overfitting of the data
-    #Test on single row dataframe (since we do not know the capacity, we test for all three available categories)
+
+    #Test on triple row dataframe (since we do not know the capacity, we test for all three available categories)
     clientrequest1 = pd.DataFrame([['2','2','0', '2', '2','2'],['2','2','1', '2', '2','2'],['2','2','2', '2', '2','2']], columns=['maint', 'doors', 'persons', 'lug_boot', 'safety', 'class'])
     priceprediction1LR = lin_reg.predict(clientrequest1)
     priceprediction1DT = tree_reg.predict(clientrequest1)
     priceprediction1RF = forest_reg.predict(clientrequest1)
     print('Capacity of 2:',priceprediction1LR,priceprediction1DT,priceprediction1RF)
+    pricepredictions = {'From LR:':priceprediction1LR,'From DT:':priceprediction1DT,'From RF:':priceprediction1RF}
     # Results for Linear Regression seem to indicate med buying price for the car, the higher the car capacity
     # Results for Decision Tree and Random Forest seem to indicate low buying price, but I believe some debugging is needed.
-    return clientrequest1
+    return pricepredictions
 
 rawpath = 'car.data'
 csvpath = 'car.data.csv'
