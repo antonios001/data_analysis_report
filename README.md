@@ -1,5 +1,5 @@
 # data_analysis_report
-## Price Prediction using Linear Regression, Decision Trees and Random Forests
+## Price Prediction using Random Forests
 
 First, I downloaded the data file, titled *car.data*, from [https://code.datasciencedojo.com/datasciencedojo/datasets/tree/master/Car%20Evaluation].
 
